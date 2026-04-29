@@ -1,0 +1,4 @@
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+export default function Onboarding(){const r=useRouter();const [form,setForm]=useState({goal:"Finish my first 5K",experienceLevel:"beginner",canWalkMinutes:20,availableDays:["Mon","Wed","Sat"],sessionsPerWeek:3,preferredCoachTone:"calm",injuryNotes:"",medicalConcern:false});const [loading,setLoading]=useState(false);return <div className="space-y-4"><h1 className="text-3xl font-bold">Onboarding</h1><p className="text-sm">Stop exercise and seek care for chest pain, fainting, severe dizziness, severe breathlessness, neurological symptoms, acute injury, or pain {`>`}5/10.</p><button disabled={loading} className="rounded bg-black px-4 py-2 text-white" onClick={async()=>{setLoading(true);await fetch('/api/onboarding',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(form)});r.push('/dashboard')}}>{loading?'Saving...':'Create my plan'}</button></div>}

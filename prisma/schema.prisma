@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PlanStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+enum WorkoutType {
+  EASY_INTERVALS
+  CONTINUOUS_RUN
+  RECOVERY_WALK
+  DELOAD
+  TEST_5K
+}
+
+enum WorkoutStatus {
+  SCHEDULED
+  COMPLETED
+  SKIPPED
+  REPEATED
+  CANCELLED
+}
+
+enum CoachRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum AdaptationDecision {
+  PROGRESS
+  REPEAT_WORKOUT
+  REPEAT_WEEK
+  DELOAD
+  PAUSE_AND_REFER
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  profile       RunnerProfile?
+  plans         TrainingPlan[]
+  runLogs       RunLog[]
+  coachMessages CoachMessage[]
+}
+
+model RunnerProfile {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goal               String
+  experienceLevel    String
+  canWalkMinutes     Int
+  availableDays      String[]
+  sessionsPerWeek    Int      @default(3)
+  preferredCoachTone String   @default("calm")
+  injuryNotes        String?
+  medicalConcern     Boolean  @default(false)
+}
+
+model TrainingPlan {
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title          String
+  status         PlanStatus   @default(DRAFT)
+  durationWeeks  Int
+  sessionsPerWeek Int
+  planJson       Json
+  safetyNotes    String[]
+  adaptationRules Json
+  workouts       Workout[]
+}
+
+model Workout {
+  id            String        @id @default(cuid())
+  planId        String
+  plan          TrainingPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
+  weekNumber    Int
+  sessionNumber Int
+  type          WorkoutType
+  status        WorkoutStatus @default(SCHEDULED)
+  title         String
+  goal          String
+  totalMinutes  Int
+  intervals     WorkoutInterval[]
+  runLogs       RunLog[]
+  @@unique([planId, weekNumber, sessionNumber])
+}
+model WorkoutInterval {
+  id          String  @id @default(cuid())
+  workoutId   String
+  workout     Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  order       Int
+  mode        String
+  durationSec Int
+  cue         String?
+}
+model RunLog {
+  id                 String              @id @default(cuid())
+  userId             String
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workoutId          String?
+  workout            Workout?            @relation(fields: [workoutId], references: [id], onDelete: SetNull)
+  completedAt        DateTime            @default(now())
+  completed          Boolean
+  durationSec        Int
+  distanceMeters     Int?
+  rpe                Int
+  soreness           Int?
+  painScore          Int?
+  notes              String?
+  adaptationDecision AdaptationDecision?
+  adaptationReason   String?
+}
+model CoachMessage {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      CoachRole
+  content   String
+  createdAt DateTime  @default(now())
+}

@@ -1,44 +1,38 @@
-# StrideAI Couch-to-5K
+# StrideAI Couch-to-5K MVP
 
-AI-native Couch-to-5K runner onboarding, plan generation, adaptive coaching, and voice-session scaffolding.
+Full-stack Next.js + Prisma beginner running app with onboarding, personalized baseline plan, dashboard, run logging adaptation, coach chat, and demo mode.
+
+## What is implemented
+- Landing page with safety-first positioning.
+- Onboarding flow that persists profile + active plan.
+- Deterministic baseline Couch-to-5K plan generation.
+- Dashboard + plan pages reading persisted plan data.
+- Run logging API with deterministic adaptation decisions.
+- Coach chat API with red-flag pre-check and demo response when no OpenAI key is configured.
+- Prisma persistence for users, profiles, plans, workouts, intervals, run logs, and coach messages.
+- Demo mode local user (`demo@strideai.app`) to run without auth/OpenAI.
 
 ## Run locally
-
 ```bash
 cp .env.example .env.local
 npm install
 npx prisma generate
+npx prisma migrate dev --name init
 npm run dev
 ```
 
-## Database
-
-```bash
-npx prisma migrate dev --name init
-```
-
 ## Deploy to Vercel
+1. Push repo to GitHub.
+2. Import project in Vercel.
+3. Provision Postgres (Vercel Postgres/Neon/Supabase).
+4. Set env vars from `.env.example`.
+5. Run migration command against production DB:
+   ```bash
+   npx prisma migrate deploy
+   ```
+6. Deploy.
 
-1. Push this repo to GitHub.
-2. Import the repo in Vercel.
-3. Add the env vars from `.env.example` in Project Settings → Environment Variables.
-4. Deploy.
-
-## OpenAI vs Azure OpenAI
-
-For OpenAI, set `OPENAI_API_KEY` and `OPENAI_MODEL`.
-
-For Azure OpenAI v1 compatibility, set `OPENAI_API_KEY`, `OPENAI_BASE_URL=https://YOUR-RESOURCE.openai.azure.com/openai/v1/`, and set `OPENAI_MODEL` to your Azure deployment name.
-
-## Product safety
-
-This app is not medical advice. It includes beginner-running guardrails, red-flag handling, and conservative deload/repeat logic. Users with medical concerns should consult a clinician before starting.
-
-## Codex handoff
-
-This repo includes Codex-ready project instructions:
-
-- `AGENTS.md` — durable repo instructions and review rules.
-- `CODEX_HANDOFF.md` — full build brief and acceptance criteria.
-- `CODEX_FIRST_PROMPT.md` — paste this into Codex as the first build task.
-- `README_CODEX.md` — how to run the handoff locally or through GitHub.
+## Notes
+- If `OPENAI_API_KEY` is absent, app uses deterministic demo behavior.
+- For Azure OpenAI set `OPENAI_BASE_URL` and `OPENAI_MODEL` deployment name.
+- Product is not medical advice; red-flag symptoms trigger pause-and-refer guidance.
