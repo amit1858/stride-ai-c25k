@@ -1,13 +1,1 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  color-scheme: light;
-}
-
-body {
-  margin: 0;
-  background: #f7f7f4;
-  color: #171717;
-}
+export {};
